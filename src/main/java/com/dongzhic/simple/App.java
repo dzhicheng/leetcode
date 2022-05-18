@@ -17,9 +17,66 @@ public class App {
 
     public static void main(String[] args) {
 
-        List<Employee> employees = new ArrayList<>();
-        getImportance(employees, 1);
+        ListNode l1 = new ListNode(1);
+        ListNode l2 = new ListNode(2);
+        ListNode l3 = new ListNode(3);
+        ListNode l4 = new ListNode(4);
+        ListNode l5 = new ListNode(5);
 
+        l1.next = l2;
+        l2.next = l3;
+        l3.next = l4;
+        l4.next = l5;
+
+
+    }
+
+    /**
+     * 两次遍历
+     * 剑指 Offer 22. 链表中倒数第k个节点
+     * @param head
+     * @param k
+     * @return
+     */
+    public static ListNode getKthFromEnd1(ListNode head, int k) {
+
+        int len = 0;
+        ListNode currNode = head;
+        while (currNode != null) {
+            len++;
+            currNode = currNode.next;
+        }
+
+        for (int i = 0; i < (len - k); i++) {
+            head = head.next;
+        }
+
+        return head;
+    }
+
+    /**
+     * 一次遍历
+     * 剑指 Offer 22. 链表中倒数第k个节点
+     * @param head
+     * @param k
+     * @return
+     */
+    public static ListNode getKthFromEnd2(ListNode head, int k) {
+        
+        ListNode slow = head;
+        ListNode fast = head;
+        
+        // 
+        for (int i = 0; i < k; i++) {
+            fast = fast.next;
+        }
+
+        while (fast != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        return slow;
     }
 
     /**
@@ -1219,28 +1276,55 @@ public class App {
 
 
     /**
-     * 226. 翻转二叉树
+     *  226. 翻转二叉树：深度优先遍历
      * @param root
      * @return
      */
-    public static TreeNode invertTree(TreeNode root) {
+    public TreeNode invertTreeDFS(TreeNode root) {
 
         if (root == null) {
             return root;
         }
 
-        TreeNode left = root.left;
-        TreeNode right = root.right;
+        TreeNode left = invertTreeDFS(root.left);
+        TreeNode right = invertTreeDFS(root.right);
 
         root.left = right;
         root.right = left;
 
-        if (left != null) {
-            invertTree(left);
+        return root;
+    }
+
+    /**
+     * 226. 翻转二叉树：广度优先遍历
+     * @param root
+     * @return
+     */
+    public TreeNode invertTreeBFS(TreeNode root) {
+        if (root == null) {
+            return root;
         }
 
-        if (right != null) {
-            invertTree(right);
+        // 存储队列
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+
+            TreeNode currNode = queue.poll();
+            TreeNode leftTreeNode = currNode.left;
+            currNode.left = currNode.right;
+            currNode.right = leftTreeNode;
+
+            if (currNode.left != null) {
+                queue.add(currNode.left);
+            }
+
+            if (currNode.right != null) {
+                queue.add(currNode.right);
+            }
+
+
         }
 
         return root;
@@ -1311,9 +1395,16 @@ public class App {
      */
     public static int singleNumber1(int[] nums) {
 
-        Arrays.sort(nums);
-        int result = nums[0];
+        /**
+         * 一共三种情况
+         * 1 2 2
+         * 2 2 1 3 3
+         * 2 2 3 3 1
+         */
 
+        Arrays.sort(nums);
+
+        // 1.前两种情况
         int i = 0;
         while (i < nums.length - 2) {
             if (nums[i] != nums[i + 1] && nums[i + 1] == nums[i + 2]) {
@@ -1323,11 +1414,8 @@ public class App {
             }
         }
 
-        if (i == nums.length - 1) {
-            result = nums[nums.length - 1];
-        }
-
-        return result;
+        // 2.最后一种情况
+        return nums[nums.length - 1];
     }
 
     /**
@@ -1349,6 +1437,42 @@ public class App {
         Integer result = 0;
         for (Integer value : set) {
             result = value;
+        }
+
+        return result;
+    }
+
+    /**
+     * 136. 只出现一次的数字
+     * @param nums
+     * @return
+     */
+    public static int singleNumber3(int[] nums) {
+        if (nums.length == 1) {
+            return nums[0];
+        }
+
+        Arrays.sort(nums);
+        int len = nums.length;
+        int result = 0;
+        for (int i = 0; i < len; i++) {
+            int num = nums[i];
+            if (i == 0) {
+                if (num != nums[1]) {
+                    result = num;
+                    break;
+                }
+            } else if (i == len-1) {
+                if (num != nums[len-2]) {
+                    result = num;
+                    break;
+                }
+            } else {
+                if (nums[i] != nums[i-1] && nums[i] != nums[i+1]) {
+                    result = num;
+                    break;
+                }
+            }
         }
 
         return result;

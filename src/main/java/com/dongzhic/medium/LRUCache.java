@@ -6,6 +6,12 @@ import java.util.Map;
 /**
  * 146. LRU 缓存机制：最近最少使用
  *  双向链表+HashMap
+ *      链表：第一个结点，刚刚使用过
+ *           最后一个节点，最久没有使用
+ *   Node类：prev，next，key，value属性
+ *   1、首节点添加元素
+ *   2、删除尾结点
+ *   3、移动节点到首节点位置
  * @Author dongzhic
  * @Date 7/7/21 10:56 PM
  */
@@ -87,7 +93,7 @@ public class LRUCache {
     }
 
     /**
-     * 删除节点
+     * 删除节点，并将节点添加到链表头部(代表刚刚使用过)
      * @param node
      */
     public void removeNode2First (Node node) {
@@ -109,8 +115,8 @@ public class LRUCache {
     public void removeLast () {
 
         Node lastNode = tail.prev;
-
         Node preNode = lastNode.prev;
+
         preNode.next = tail;
         tail.prev = preNode;
 
@@ -124,6 +130,7 @@ public class LRUCache {
      */
     public void addNode2First (Node node) {
         Node firstNode = head.next;
+
         firstNode.prev = node;
         node.next = firstNode;
 

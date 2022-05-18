@@ -15,10 +15,553 @@ import java.util.*;
 public class App {
 
     public static void main(String[] args) {
+        ListNode l1 = new ListNode(1);
+        ListNode l2 = new ListNode(2);
+        ListNode l3 = new ListNode(3);
+        ListNode l4 = new ListNode(4);
+        ListNode l5 = new ListNode(5);
 
-        int[] preorder = {3,9,20,15,7};
-        int[] inorder = {9,3,15,20,7};
-        buildTree2(preorder, inorder);
+        l1.next = l2;
+        l2.next = l3;
+        l3.next = l4;
+        l4.next = l5;
+
+        getKthFromEnd11(l1, 2);
+    }
+
+    /**
+     * 剑指 Offer 22. 链表中倒数第k个节点
+     *  两次遍历
+     * @param head
+     * @param k
+     * @return
+     */
+    public static ListNode getKthFromEnd11(ListNode head, int k) {
+        // 1.获取链表的长度
+        int len = 0;
+        ListNode node1 = head;
+        while (node1 != null) {
+            len++;
+            node1 = node1.next;
+        }
+
+        int index = 0;
+        ListNode node2 = head;
+        while (index != len - k) {
+            index++;
+            node2 = node2.next;
+        }
+
+        return node2;
+    }
+
+    /**
+     * 剑指 Offer 22. 链表中倒数第k个节点
+     *  快慢指针
+     * @param head
+     * @param k
+     * @return
+     */
+    public static ListNode getKthFromEnd12(ListNode head, int k) {
+
+        // 1.初始化，使两个指针相差k
+        ListNode slowNode = head;
+        ListNode fastNode = head;
+        for (int i = 0; i < k; i++) {
+            fastNode = fastNode.next;
+        }
+
+        // 2.两个指针同时移动，当快指针为空是，慢指针为倒数第k个节点
+        while (fastNode != null) {
+            slowNode = slowNode.next;
+            fastNode = fastNode.next;
+        }
+
+        return slowNode;
+    }
+
+    /**
+     * 46. 全排列
+     * @param nums
+     * @return
+     */
+    public static List<List<Integer>> permute1(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+
+        if (nums == null || nums.length == 0) {
+            return result;
+        }
+
+        dfsPermute1(nums, new ArrayList<>(), result);
+
+        return result;
+    }
+    public static void dfsPermute1(int[] nums, List<Integer> path, List<List<Integer>> res) {
+
+        // 递归中止
+        if (path.size() == nums.length) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        // 去重
+        for (int i = 0; i < nums.length; i++) {
+            int num = nums[i];
+            if (!path.contains(num)) {
+                path.add(num);
+                dfsPermute1(nums, path, res);
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+
+
+    /**
+     * 662. 二叉树最大宽度：遍历
+     * BFS + 完全二叉树特性
+     * @param root
+     * @return
+     */
+    public static int widthOfBinaryTree(TreeNode root) {
+
+        // 判空
+        if (root == null) {
+            return 0;
+        }
+
+        int maxWidth = 1;
+
+        LinkedList<TreeNode> treeList = new LinkedList<>();
+        LinkedList<Integer> indexTreeList = new LinkedList<>();
+
+        // 初始化
+        treeList.add(root);
+        indexTreeList.add(1);
+
+        while (!treeList.isEmpty()) {
+
+            int currWith = treeList.size();
+            int leftIndex = indexTreeList.peek();
+            int rightIndex = leftIndex;
+
+            while (currWith > 0) {
+                TreeNode currNode = treeList.poll();
+                rightIndex = indexTreeList.poll();
+
+                if (currNode.left != null) {
+                    treeList.add(currNode.left);
+                    indexTreeList.add(rightIndex * 2);
+                }
+                if (currNode.right != null) {
+                    treeList.add(currNode.right);
+                    indexTreeList.add(rightIndex * 2 + 1);
+                }
+
+                currWith--;
+            }
+
+            int currMaxWith = rightIndex - leftIndex + 1;
+            maxWidth = Math.max(maxWidth, currMaxWith);
+
+        }
+
+        return maxWidth;
+    }
+
+    /**
+     * 142. 环形链表 II
+     *  [-21,10,17,8,4,26,5,35,33,-7,-16,27,-12,6,29,-12,5,9,20,14,14,2,13,-24,21,23,-21,5]
+     * 24
+     * @param head
+     * @return
+     */
+    public static ListNode detectCycle(ListNode head) {
+        if (head == null || head.next == null) {
+            return null;
+        }
+
+        ListNode slow = head;
+        ListNode fast = head;
+
+        while (fast != null && fast.next != null) {
+
+            slow = slow.next;
+            fast = fast.next.next;
+
+            // 找到相遇节点
+            if (slow == fast) {
+
+                ListNode cNode = head;
+                ListNode bNode = slow;
+
+                while (true) {
+                    if (cNode == bNode) {
+                        return cNode;
+                    }
+
+                    cNode = cNode.next;
+                    bNode = bNode.next;
+                }
+            }
+
+        }
+
+        return null;
+    }
+
+    /**
+     * 200. 岛屿数量：DFS(深度优先遍历)
+     * @param grid
+     * @return
+     */
+    public static int numIslands(char[][] grid) {
+        // 岛屿数量
+        int numIsLands = 0;
+
+        if (grid == null || grid.length == 0) {
+            return numIsLands;
+        }
+
+        int rowLen = grid.length;
+        int colLen = grid[0].length;
+
+        for (int i = 0; i < rowLen; i++) {
+            for (int j = 0; j < colLen; j++) {
+
+                if (grid[i][j] == '1') {
+                    numIsLands = numIsLands + 1;
+                    dfsNumIsLands(grid, i, j, rowLen, colLen);
+                }
+
+            }
+        }
+
+        return numIsLands;
+    }
+
+    public static void dfsNumIsLands (char[][] grid, int i, int j, int rowLen, int colLen) {
+
+        // 界限判断
+        if (i < 0 || j < 0 || i >= rowLen || j >= colLen || grid[i][j] == '0') {
+            return;
+        }
+
+        grid[i][j] = '0';
+
+        dfsNumIsLands(grid,i - 1, j, rowLen, colLen);
+        dfsNumIsLands(grid,i + 1, j, rowLen, colLen);
+        dfsNumIsLands(grid,i, j - 1, rowLen, colLen);
+        dfsNumIsLands(grid,i, j + 1, rowLen, colLen);
+
+    }
+
+    /**
+     * 33. 搜索旋转排序数组
+     * @param nums
+     * @param target
+     * @return
+     */
+    public static int search(int[] nums, int target) {
+
+        if (nums == null) {
+            return -1;
+        }
+        if (nums.length == 1) {
+            return nums[0] == target ? nums[0] : -1;
+        }
+
+        int reverseIndex = 0;
+        for (int i = 0; i < nums.length - 1; i++) {
+            if (nums[i] > nums[i + 1]) {
+                reverseIndex = i;
+                break;
+            }
+        }
+
+        int leftTarget = binarySearch(nums, 0, reverseIndex, target);
+        int rightTarget = binarySearch(nums, reverseIndex + 1, nums.length - 1, target);
+
+        return leftTarget != -1 ? leftTarget : rightTarget;
+    }
+
+    public static int binarySearch (int[] nums, int left, int right, int target) {
+
+        while (left <= right) {
+            int middle = (left + right) / 2;
+            if (nums[middle] > target) {
+                right = middle - 1;
+            } else if (nums[middle] < target) {
+                left = middle + 1;
+            } else {
+                return middle;
+            }
+        }
+        return -1;
+    }
+
+
+    /**
+     * 236. 二叉树的最近公共祖先：递归
+     * @param root
+     * @param p
+     * @param q
+     * @return
+     */
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+
+        TreeNode pqLeft = lowestCommonAncestor(root.left, p, q);
+        TreeNode pqRight = lowestCommonAncestor(root.right, p, q);
+
+        if (pqLeft == null) {
+            return pqRight;
+        }
+
+        if (pqRight == null) {
+            return pqLeft;
+        }
+
+        return root;
+    }
+
+    /**
+     * 236. 二叉树的最近公共祖先：递归
+     * @param root
+     * @param p
+     * @param q
+     * @return
+     */
+    public TreeNode lowestCommonAncestor1(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+
+        boolean pInLeft = findNode1(root.left, p) != null;
+        boolean pInRight = !pInLeft;
+
+        boolean qInLeft = findNode1(root.left, q) != null;
+        boolean qInRight = !qInLeft;
+
+        if (pInLeft && qInLeft) {
+            return lowestCommonAncestor1(root.left, p, q);
+        }
+        if (pInRight && qInRight) {
+            return lowestCommonAncestor1(root.right, p, q);
+        }
+
+        return root;
+    }
+    /**
+     * 查找某个节点
+     * @param root 根节点
+     * @param node 查找节点
+     * @return
+     */
+    public TreeNode findNode1 (TreeNode root, TreeNode node) {
+        if (root == null || root == node) {
+            return root;
+        }
+
+        TreeNode leftNode = findNode1(root.left, node);
+        TreeNode rightNode = findNode1(root.right, node);
+
+        return leftNode == null ? rightNode : leftNode;
+    }
+
+    /**
+     * 236. 二叉树的最近公共祖先：递归优化，一次找两个节点
+     * @param root
+     * @param p
+     * @param q
+     * @return
+     */
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+
+        TreeNode pqInLeft = findNode2(root.left, p, q);
+        TreeNode pqInRight = findNode2(root.right, p, q);
+
+        if (pqInLeft == null) {
+            return lowestCommonAncestor2(root.right, p, q);
+        }
+        if (pqInRight == null) {
+            return lowestCommonAncestor2(root.left, p, q);
+        }
+
+        return root;
+    }
+    public TreeNode findNode2 (TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+
+        TreeNode leftNode = findNode2(root.left, p, q);
+        TreeNode rightNode = findNode2(root.right, p, q);
+
+        return leftNode == null ? rightNode : leftNode;
+    }
+
+    /**
+     * 92. 反转链表 II：将链表切分为三个部分
+     * @param head
+     * @param left
+     * @param right
+     * @return
+     */
+    public static ListNode reverseBetween(ListNode head, int left, int right) {
+
+            if (left == right) {
+                return head;
+            }
+
+            ListNode newNode = new ListNode(-1);
+            newNode.next = head;
+            ListNode currNode = newNode;
+
+            for (int i = 1; i < left; i++) {
+                currNode = currNode.next;
+            }
+
+            ListNode leftEndNode = currNode;
+            for (int j = left; j <= right; j ++) {
+                currNode = currNode.next;
+            }
+
+            ListNode rightNode = currNode.next;
+            ListNode middleNode = leftEndNode.next;
+
+            currNode.next = null;
+            leftEndNode.next = null;
+            leftEndNode.next = reverseNode(middleNode);
+
+            middleNode.next = rightNode;
+
+            return newNode.next;
+    }
+
+    /**
+     * 反转链表
+     * @param head
+     * @return
+     */
+    public static ListNode reverseNode (ListNode head) {
+
+        if (head == null || head.next == null) {
+            return head;
+        }
+
+        ListNode newHead = null;
+        while (head != null) {
+            ListNode nextNode = head.next;
+
+            head.next = newHead;
+            newHead = head;
+
+            head = nextNode;
+        }
+
+        return newHead;
+    }
+
+    /**
+     * 102. 二叉树的层序遍历：使用栈存储节点
+     * @param root
+     * @return
+     */
+    public static List<List<Integer>> levelOrder(TreeNode root) {
+
+        List<List<Integer>> result = new ArrayList<>();
+        Stack<List<TreeNode>> stack = new Stack<>();
+
+        if (root == null) {
+            return result;
+        }
+
+        // 初始化
+        List<TreeNode> rootList = new ArrayList<>();
+        rootList.add(root);
+        stack.push(rootList);
+
+        while (!stack.isEmpty()) {
+            List<TreeNode> currList = stack.pop();
+            List<TreeNode> nextList = new ArrayList<>();
+            List<Integer> list = new ArrayList<>();
+
+            for (TreeNode treeNode : currList) {
+                list.add(treeNode.val);
+
+                if (treeNode.left != null) {
+                    nextList.add(treeNode.left);
+                }
+                if (treeNode.right != null) {
+                    nextList.add(treeNode.right);
+                }
+            }
+
+            if (nextList.size() > 0) {
+                stack.push(nextList);
+            }
+
+            result.add(list);
+        }
+
+        return result;
+    }
+
+    /**
+     * 103. 二叉树的锯齿形层序遍历
+     * @param root
+     * @return
+     */
+    public static List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+
+        List<List<Integer>> result = new ArrayList<>();
+        Stack<List<TreeNode>> stack = new Stack<>();
+
+        if (root == null) {
+            return result;
+        }
+
+        // 初始化
+        List<TreeNode> rootList = new ArrayList<>();
+        rootList.add(root);
+        stack.push(rootList);
+
+        // 奇数代表正序，偶数代表倒叙
+        int odd = 1;
+        while (!stack.isEmpty()) {
+            List<TreeNode> currList = stack.pop();
+            List<TreeNode> nextList = new ArrayList<>();
+            List<Integer> list = new ArrayList<>();
+
+            for (TreeNode node : currList) {
+                list.add(node.val);
+
+                if (node.left != null) {
+                    nextList.add(node.left);
+                }
+                if (node.right != null) {
+                    nextList.add(node.right);
+                }
+            }
+
+            if (nextList.size() > 0) {
+                stack.add(nextList);
+            }
+
+            if (odd % 2 == 0) {
+                Collections.reverse(list);
+            }
+
+            result.add(list);
+            odd++;
+        }
+
+        return result;
     }
 
     /**
@@ -704,6 +1247,7 @@ public class App {
 
             char c = s.charAt(fast);
             if (map.containsKey(c)) {
+                // 避免abba情况
                 slow = Math.max(slow, map.get(c) + 1);
             }
             map.put(c, fast);
